@@ -3,9 +3,12 @@ package hello.core.scope;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Scope;
+
+import javax.inject.Provider;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
@@ -34,35 +37,17 @@ public class SingletonWithPrototypeTest1 {
 
         ClienBean clienBean2 = ac.getBean(ClienBean.class);
         int count2 = clienBean2.logic();
-        assertThat(count2).isEqualTo(2);
+        assertThat(count2).isEqualTo(1);
     }
 
     @Scope("singleton")
     static class ClienBean {
-        private final PrototypeBean prototypeBean;
 
         @Autowired
-        public ClienBean(PrototypeBean prototypeBean) {
-            this.prototypeBean = prototypeBean;
-        }
+        private Provider<PrototypeBean> prototypeBeanProvider;
 
         public int logic() {
-            prototypeBean.addCount();
-            int count = prototypeBean.getCount();
-            return count;
-        }
-    }
-
-    @Scope("singleton")
-    static class ClienBean2 {
-        private final PrototypeBean prototypeBean;
-
-        @Autowired
-        public ClienBean2(PrototypeBean prototypeBean) {
-            this.prototypeBean = prototypeBean;
-        }
-
-        public int logic() {
+            PrototypeBean prototypeBean = prototypeBeanProvider.get();
             prototypeBean.addCount();
             int count = prototypeBean.getCount();
             return count;
